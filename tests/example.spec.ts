@@ -53,3 +53,38 @@ test("Get all article", async () => {
   expect(getArticleResp.status()).toEqual(200);
   expect(getArticleRespJson.articles.length).toEqual(10);
 });
+
+test("Create Article", async ({ request }) => {
+  const authResponse = await request.post(
+    "https://conduit-api.bondaracademy.com/api/users/login",
+    {
+      data: {
+        user: {
+          email: "nafees.mca07@gmail.com",
+          password: "khan1234",
+        },
+      },
+    },
+  );
+  const authRespJson = await authResponse.json();
+  const authToken = "Token" + " " + authRespJson.user.token;
+  console.log(authToken);
+  const postArticleResp = await request.post(
+    "https://conduit-api.bondaracademy.com/api/articles/",
+    {
+      headers: {
+        Authorization: authToken,
+      },
+      data: {
+        article: {
+          title: "test4",
+          description: "test desc",
+          body: "test body",
+          tagList: ["playwright"],
+        },
+      },
+    },
+  );
+  const postArticleRespjson = await postArticleResp.json();
+  console.log(postArticleRespjson);
+});
