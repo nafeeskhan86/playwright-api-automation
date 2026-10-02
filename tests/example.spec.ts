@@ -1,66 +1,9 @@
 import { test, expect, request } from "@playwright/test";
 
-test("get test tags", async ({ request }) => {
-  const tagsResponse = await request.get(
-    "https://conduit-api.bondaracademy.com/api/tags",
-  );
-  const tagsResponseJson = await tagsResponse.json();
-  console.log(tagsResponseJson);
-  expect(tagsResponse.status()).toEqual(200);
-  expect(tagsResponseJson.tags[0]).toEqual("Test");
-  expect(tagsResponseJson.tags.length).toBeLessThanOrEqual(10);
-  expect(tagsResponseJson).toHaveProperty("tags");
-});
+let authToken: string;
 
-// test('Get all article', async({request})=>{
-// const getArticleResp = await request.get('https://conduit-api.bondaracademy.com/api/articles?limit=10&offset=0');
-// const getArticleRespJson = await getArticleResp.json();
-// console.log(getArticleRespJson)
-// }
-// )
-
-// test("Get all article", async ({ request }) => {
-//   const queryParams = {
-//     limit: 10,
-//     offset: 0,
-//   };
-//   const getArticleResp = await request.get(
-//     "https://conduit-api.bondaracademy.com/api/articles",
-//     {
-//       params: queryParams,
-//     },
-//   );
-//   const getArticleRespJson = await getArticleResp.json();
-//   console.log(getArticleRespJson);
-//   expect(getArticleResp.status()).toEqual(200);
-//   expect(getArticleRespJson.articles.length).toEqual(10);
-// });
-
-test("Get all article", async () => {
-  const apiContext = await request.newContext();
-  const queryParams = {
-    limit: 10,
-    offset: 0,
-  };
-  const getArticleResp = await apiContext.get(
-    "https://conduit-api.bondaracademy.com/api/articles",
-    {
-      params: queryParams,
-    },
-  );
-  const getArticleRespJson = await getArticleResp.json();
-  console.log(getArticleRespJson);
-  expect(getArticleResp.status()).toEqual(200);
-  expect(getArticleRespJson.articles.length).toEqual(10);
-});
-
-test("Create and Delete Article", async ({}) => {
-  const apiContext = await request.newContext();
-  const queryParams = {
-    limit: 10,
-    offset: 0,
-  };
-  const authResponse = await apiContext.post(
+test.beforeAll("Run this before all tests", async ({ request }) => {
+  const authResponse = await request.post(
     "https://conduit-api.bondaracademy.com/api/users/login",
     {
       data: {
@@ -72,9 +15,37 @@ test("Create and Delete Article", async ({}) => {
     },
   );
   const authRespJson = await authResponse.json();
-  const authToken = "Token" + " " + authRespJson.user.token;
-  console.log(authToken);
-  const postArticleResp = await apiContext.post(
+  authToken = "Token" + " " + authRespJson.user.token;
+});
+
+test("get test tags", async ({ request }) => {
+  const tagsResponse = await request.get(
+    "https://conduit-api.bondaracademy.com/api/tags",
+  );
+  const tagsResponseJson = await tagsResponse.json();
+  expect(tagsResponse.status()).toEqual(200);
+  expect(tagsResponseJson.tags[0]).toEqual("Test");
+  expect(tagsResponseJson.tags.length).toBeLessThanOrEqual(10);
+  expect(tagsResponseJson).toHaveProperty("tags");
+});
+
+test("Get all article", async ({ request }) => {
+  const getArticleResp = await request.get(
+    "https://conduit-api.bondaracademy.com/api/articles",
+    {
+      params: {
+        limit: 10,
+        offset: 0,
+      },
+    },
+  );
+  const getArticleRespJson = await getArticleResp.json();
+  expect(getArticleResp.status()).toEqual(200);
+  expect(getArticleRespJson.articles.length).toEqual(10);
+});
+
+test("Create and Delete Article", async ({ request }) => {
+  const postArticleResp = await request.post(
     "https://conduit-api.bondaracademy.com/api/articles/",
     {
       headers: {
@@ -82,7 +53,7 @@ test("Create and Delete Article", async ({}) => {
       },
       data: {
         article: {
-          title: "test8",
+          title: "test1",
           description: "test desc",
           body: "test body",
           tagList: ["playwright"],
@@ -91,27 +62,99 @@ test("Create and Delete Article", async ({}) => {
     },
   );
   const postArticleRespjson = await postArticleResp.json();
-  console.log(postArticleRespjson);
   const slugID = postArticleRespjson.article.slug;
-  console.log(slugID);
-  const getArticleResp = await apiContext.get(
+  const getArticleResp = await request.get(
     "https://conduit-api.bondaracademy.com/api/articles",
     {
-      params: queryParams,
+      params: {
+        limit: 10,
+        offset: 0,
+      },
       headers: {
         Authorization: authToken,
       },
     },
   );
   const getArticleRespJson = await getArticleResp.json();
-  expect(getArticleRespJson.articles[0].title).toEqual("test8");
+  expect(getArticleRespJson.articles[0].title).toEqual("test1");
 
-  const deleteResponse = await apiContext.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugID}`,
+  const deleteResponse = await request.delete(
+    `https://conduit-api.bondaracademy.com/api/articles/${slugID}`,
     {
       headers: {
         Authorization: authToken,
-      }
-    }
-  )
+      },
+    },
+  );
   expect(deleteResponse.status()).toEqual(204);
-})
+});
+
+test("Create update and Delete Article", async ({ request }) => {
+  const postArticleResp = await request.post(
+    "https://conduit-api.bondaracademy.com/api/articles/",
+    {
+      headers: {
+        Authorization: authToken,
+      },
+      data: {
+        article: {
+          title: "Test New Article",
+          description: "test desc",
+          body: "test body",
+          tagList: ["playwright"],
+        },
+      },
+    },
+  );
+  const postArticleRespjson = await postArticleResp.json();
+  const slugID = postArticleRespjson.article.slug;
+  const getArticleResp = await request.get(
+    "https://conduit-api.bondaracademy.com/api/articles",
+    {
+      params: {
+        limit: 10,
+        offset: 0,
+      },
+      headers: {
+        Authorization: authToken,
+      },
+    },
+  );
+  const getArticleRespJson = await getArticleResp.json();
+  expect(getArticleRespJson.articles[0].title).toEqual("Test New Article");
+  ///////////////////////
+  const updateArticleResp = await request.put(
+    `https://conduit-api.bondaracademy.com/api/articles/${slugID}`,
+    {
+      headers: {
+        Authorization: authToken,
+      },
+      data: {
+        article: {
+          title: "Updated Article Title",
+          description: "Updated description",
+          body: "Updated body",
+          tagList: ["playwright", "updated"],
+        },
+      },
+    },
+  );
+  const updateArticleRespJson = await updateArticleResp.json();
+  expect(updateArticleResp.status()).toEqual(200);
+  expect(updateArticleRespJson.article.title).toEqual("Updated Article Title");
+  expect(updateArticleRespJson.article.description).toEqual(
+    "Updated description",
+  );
+  expect(updateArticleRespJson.article.body).toEqual("Updated body");
+  const newslugID = updateArticleRespJson.article.slug;
+  //////////////////
+  const deleteResponse = await request.delete(
+    `https://conduit-api.bondaracademy.com/api/articles/${newslugID}`,
+    {
+      headers: {
+        Authorization: authToken,
+      },
+    },
+  );
+  expect(deleteResponse.status()).toEqual(204);
+});
