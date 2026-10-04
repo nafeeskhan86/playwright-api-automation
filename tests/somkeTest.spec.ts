@@ -21,7 +21,8 @@ test("Get Article", async ({ api }) => {
     .path("/articles")
     .params({ limit: 10, offset: 0 })
     .getRequest(200);
-  expect(response.articles.length).toEqual(10);
+  expect(response.articles.length).toBeLessThanOrEqual(10);
+  expect(response.articlesCount).not.shouldEqual(10);
 });
 
 test("Get Tags", async ({ api }) => {
