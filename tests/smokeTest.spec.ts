@@ -24,6 +24,7 @@ test("Get Article", async ({ api }) => {
     .path("/articles")
     .params({ limit: 10, offset: 0 })
     .getRequest(200);
+  await expect(response).shouldMatchSchema("articles", "GET_articles");
   expect(response.articles.length).toBeLessThanOrEqual(10);
   expect(response.articlesCount).shouldEqual(10);
 
@@ -36,7 +37,7 @@ test("Get Article", async ({ api }) => {
 test("Get Tags", async ({ api }) => {
   const response = await api.path("/tags").getRequest(200);
   // expect(response).shouldMatchSchema("tags", "GET_tags");
-  await expect(response).shouldMatchSchema("tags", "GET_tags");
+  await expect(response).shouldMatchSchema("tags", "GET_tags",true);
   // await validateSchema("tags", "GET_tags", response);
   expect(response.tags[0]).toEqual("Test");
   expect(response.tags.length).toBeLessThanOrEqual(10);
@@ -54,6 +55,7 @@ test("Create and Delete Article", async ({ api }) => {
       },
     })
     .postRequest(201);
+  await expect(postArticleResp).shouldMatchSchema("articles", "POST_articles");
   expect(postArticleResp.article.title).toEqual("My Article");
   const slugID = postArticleResp.article.slug;
   const getArticleResp = await api
