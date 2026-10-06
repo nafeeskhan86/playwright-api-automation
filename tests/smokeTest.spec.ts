@@ -1,6 +1,7 @@
 import { createToken } from "../helpers/CreateToken";
 import { test } from "../Utils/fixtures";
 import { expect } from "@playwright/test";
+import { validateSchema } from "../Utils/schema-validator";
 
 let authToken: string;
 
@@ -34,6 +35,9 @@ test("Get Article", async ({ api }) => {
 
 test("Get Tags", async ({ api }) => {
   const response = await api.path("/tags").getRequest(200);
+  // expect(response).shouldMatchSchema("tags", "GET_tags");
+  await expect(response).shouldMatchSchema("tags", "GET_tags");
+  // await validateSchema("tags", "GET_tags", response);
   expect(response.tags[0]).toEqual("Test");
   expect(response.tags.length).toBeLessThanOrEqual(10);
   expect(response).toHaveProperty("tags");
