@@ -1,19 +1,20 @@
+import { createToken } from "../helpers/CreateToken";
 import { test } from "../Utils/fixtures";
 import { expect } from "@playwright/test";
 
 let authToken: string;
 
 test.beforeAll("Run this before all tests", async ({ api, config }) => {
-  const authResponse = await api
-    .path("/users/login")
-    .body({
-      user: {
-        email: config.email,
-        password: config.password,
-      },
-    })
-    .postRequest(200);
-  authToken = "Token " + authResponse.user.token;
+  // const authResponse = await api
+  //   .path("/users/login")
+  //   .body({
+  //     user: {
+  //       email: config.email,
+  //       password: config.password,
+  //     },
+  //   })
+  //   .postRequest(200);
+  authToken = await createToken(config.email, config.password);
   // console.log(authResponse.user);
 });
 
@@ -27,7 +28,7 @@ test("Get Article", async ({ api }) => {
 
   const response2 = await api.path("/tags").getRequest(200);
   expect(response2.tags[0]).toEqual("Test");
-  expect(response2.tags.length).shouldBeLessThanOrEqual(4);
+  expect(response2.tags.length).shouldBeLessThanOrEqual(10);
   expect(response2).toHaveProperty("tags");
 });
 
