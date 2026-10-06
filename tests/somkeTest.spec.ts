@@ -4,19 +4,19 @@ import { expect } from "@playwright/test";
 
 let authToken: string;
 
-test.beforeAll("Run this before all tests", async ({ api, config }) => {
-  // const authResponse = await api
-  //   .path("/users/login")
-  //   .body({
-  //     user: {
-  //       email: config.email,
-  //       password: config.password,
-  //     },
-  //   })
-  //   .postRequest(200);
-  authToken = await createToken(config.email, config.password);
-  // console.log(authResponse.user);
-});
+// test.beforeAll("Run this before all tests", async ({ api, config }) => {
+//   // const authResponse = await api
+//   //   .path("/users/login")
+//   //   .body({
+//   //     user: {
+//   //       email: config.email,
+//   //       password: config.password,
+//   //     },
+//   //   })
+//   //   .postRequest(200);
+//   authToken = await createToken(config.email, config.password);
+//   // console.log(authResponse.user);
+// });
 
 test("Get Article", async ({ api }) => {
   const response = await api
@@ -42,7 +42,6 @@ test("Get Tags", async ({ api }) => {
 test("Create and Delete Article", async ({ api }) => {
   const postArticleResp = await api
     .path("/articles")
-    .headers({ Authorization: authToken })
     .body({
       article: {
         title: "My Article",
@@ -51,24 +50,22 @@ test("Create and Delete Article", async ({ api }) => {
       },
     })
     .postRequest(201);
+  expect(postArticleResp.article.title).toEqual("My Article");
   const slugID = postArticleResp.article.slug;
   const getArticleResp = await api
     .path(`/articles`)
-    .headers({ Authorization: authToken })
     .params({ limit: 10, offset: 0 })
     .getRequest(200);
   expect(getArticleResp.articles[0].title).toEqual("My Article");
 
   const deleteArticleResp = await api
     .path(`/articles/${slugID}`)
-    .headers({ Authorization: authToken })
     .deleteRequest(204);
 });
 
 test("Create Update and Delete Article", async ({ api }) => {
   const postArticleResp = await api
     .path("/articles")
-    .headers({ Authorization: authToken })
     .body({
       article: {
         title: "My Article",
@@ -80,14 +77,12 @@ test("Create Update and Delete Article", async ({ api }) => {
   const slugID = postArticleResp.article.slug;
   const getArticleResp = await api
     .path(`/articles`)
-    .headers({ Authorization: authToken })
     .params({ limit: 10, offset: 0 })
     .getRequest(200);
   expect(getArticleResp.articles[0].title).toEqual("My Article");
 
   const updateArticleResp = await api
     .path(`/articles/${slugID}`)
-    .headers({ Authorization: authToken })
     .body({
       article: {
         title: "Updated Article",
@@ -101,12 +96,10 @@ test("Create Update and Delete Article", async ({ api }) => {
 
   const deleteArticleResp = await api
     .path(`/articles/${newslugID}`)
-    .headers({ Authorization: authToken })
     .deleteRequest(204);
 
   const getArticleRespTwo = await api
     .path(`/articles`)
-    .headers({ Authorization: authToken })
     .params({ limit: 10, offset: 0 })
     .getRequest(200);
   expect(getArticleRespTwo.articles[0].title).not.toEqual("Updated Article");
