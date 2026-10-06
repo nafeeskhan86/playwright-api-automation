@@ -3,17 +3,18 @@ import { expect } from "@playwright/test";
 
 let authToken: string;
 
-test.beforeAll("Run this before all tests", async ({ api }) => {
+test.beforeAll("Run this before all tests", async ({ api, config }) => {
   const authResponse = await api
     .path("/users/login")
     .body({
       user: {
-        email: "nafees.mca07@gmail.com",
-        password: "khan1234",
+        email: config.email,
+        password: config.password,
       },
     })
     .postRequest(200);
   authToken = "Token " + authResponse.user.token;
+  console.log(authResponse.user);
 });
 
 test("Get Article", async ({ api }) => {
@@ -22,7 +23,12 @@ test("Get Article", async ({ api }) => {
     .params({ limit: 10, offset: 0 })
     .getRequest(200);
   expect(response.articles.length).toBeLessThanOrEqual(10);
-  expect(response.articlesCount).not.shouldEqual(10);
+  expect(response.articlesCount).shouldEqual(10);
+
+    const response2 = await api.path("/tags").getRequest(200);
+  expect(response2.tags[0]).toEqual("Test");
+  expect(response2.tags.length).toBeLessThanOrEqual(10);
+  expect(response2).toHaveProperty("tags");
 });
 
 test("Get Tags", async ({ api }) => {
