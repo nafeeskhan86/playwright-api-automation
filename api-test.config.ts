@@ -1,7 +1,7 @@
 const processENV = process.env.TEST_ENV;
 const env = processENV || "prod";
 
-console.log("Current Environment:", env);
+// console.log("Current Environment:", env);
 
 const config = {
   apiUrl: "https://conduit-api.bondaracademy.com/api",

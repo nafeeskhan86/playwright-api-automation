@@ -5,7 +5,7 @@ import { APILogger } from "./logger";
 export class RequestHandler {
   private request: APIRequestContext;
   private logger: APILogger;
-  private baseUrl!: string;
+  private baseUrl!: string | undefined;
   private defaultBaseUrl!: string;
   private apiPath: String = "";
   private queryParams: object = {};
@@ -20,6 +20,7 @@ export class RequestHandler {
     this.request = request;
     this.baseUrl = apiBaseUrl;
     this.logger = logger;
+    this.defaultBaseUrl = apiBaseUrl;
   }
 
   url(url: string) {
@@ -49,6 +50,7 @@ export class RequestHandler {
     const reponse = await this.request.get(url, {
       headers: this.requestHeaders,
     });
+    this.cleanUpFields();
     const actualStatus = reponse.status();
     const responseJson = await reponse.json();
     this.logger.logResponse(actualStatus, responseJson);
@@ -63,6 +65,7 @@ export class RequestHandler {
       headers: this.requestHeaders,
       data: this.requestBody,
     });
+    this.cleanUpFields();
     const actualStatus = reponse.status();
     const responseJson = await reponse.json();
     this.logger.logResponse(actualStatus, responseJson);
@@ -77,6 +80,7 @@ export class RequestHandler {
       headers: this.requestHeaders,
       data: this.requestBody,
     });
+    this.cleanUpFields();
     const actualStatus = reponse.status();
     const responseJson = await reponse.json();
     this.logger.logResponse(actualStatus, responseJson);
@@ -90,6 +94,7 @@ export class RequestHandler {
     const reponse = await this.request.delete(url, {
       headers: this.requestHeaders,
     });
+    this.cleanUpFields();
     const actualStatus = reponse.status();
     this.logger.logResponse(actualStatus);
     this.statusCodeValidator(actualStatus, status, this.deleteRequest);
@@ -123,5 +128,13 @@ export class RequestHandler {
       ).captureStackTrace?.(error, callingMethod);
       throw error;
     }
+  }
+
+  private cleanUpFields() {
+    this.requestHeaders = {};
+    this.requestBody = {};
+    this.queryParams = {};
+    this.apiPath = "";
+    this.baseUrl = undefined;
   }
 }

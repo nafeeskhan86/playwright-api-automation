@@ -2,7 +2,7 @@ import { test as base, expect } from "@playwright/test";
 import { RequestHandler } from "./request-handler";
 import { APILogger } from "./logger";
 import { setCustomExpectLogger } from "./custom-expect";
-import { config } from "../api-test.config.ts";
+import { config } from "../api-test.config";
 
 export type Fixtures = {
   api: RequestHandler;
@@ -18,5 +18,5 @@ export const test = base.extend<Fixtures>({
   },
   config: async ({}, use) => {
     await use(config);
-  }
+  },
 });

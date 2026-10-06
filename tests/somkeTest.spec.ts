@@ -14,7 +14,7 @@ test.beforeAll("Run this before all tests", async ({ api, config }) => {
     })
     .postRequest(200);
   authToken = "Token " + authResponse.user.token;
-  console.log(authResponse.user);
+  // console.log(authResponse.user);
 });
 
 test("Get Article", async ({ api }) => {
@@ -25,9 +25,9 @@ test("Get Article", async ({ api }) => {
   expect(response.articles.length).toBeLessThanOrEqual(10);
   expect(response.articlesCount).shouldEqual(10);
 
-    const response2 = await api.path("/tags").getRequest(200);
+  const response2 = await api.path("/tags").getRequest(200);
   expect(response2.tags[0]).toEqual("Test");
-  expect(response2.tags.length).toBeLessThanOrEqual(10);
+  expect(response2.tags.length).shouldBeLessThanOrEqual(4);
   expect(response2).toHaveProperty("tags");
 });
 
